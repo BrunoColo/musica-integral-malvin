@@ -485,6 +485,7 @@ h3 { font-size: 1.45rem; line-height: 1.12; }
   .facts b { font-size: 1.9rem; }
   .facts span { font-size: .84rem; }
   .fab { width: 54px; height: 54px; right: 14px; bottom: 14px; }
+  .footer { padding-bottom: 88px; }
   .fab svg { width: 27px; height: 27px; }
   .hero__photo { box-shadow: 7px 7px 0 var(--ink); }
   .hero__b1 { width: 220px; right: -110px; }
