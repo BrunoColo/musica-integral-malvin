@@ -217,8 +217,10 @@ document.querySelectorAll('main section[id]').forEach((sec) => ioNav.observe(sec
 
   // ----- Motor de sonido -----
   let ctx, salida, ruido;
+  // iPhone: que suene aunque tenga puesta la llave de silencio
+  if (navigator.audioSession) navigator.audioSession.type = 'playback';
   function iniciarAudio() {
-    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    if (ctx) { if (ctx.state !== 'running') ctx.resume(); return; }
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -16; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.25;
@@ -239,6 +241,15 @@ document.querySelectorAll('main section[id]').forEach((sec) => ioNav.observe(sec
     const r = ruido.getChannelData(0);
     for (let i = 0; i < r.length; i++) r[i] = (Math.random() * 2 - 1) * (1 - i / r.length) ** 2;
   }
+  // En el celular el navegador habilita el sonido al soltar el dedo, no al apoyarlo:
+  // cualquier toque en la página lo deja listo, con un sonido mudo que lo destraba en iPhone
+  const gestos = ['pointerup', 'touchend', 'click', 'keydown'];
+  function destrabar() {
+    iniciarAudio();
+    const b = ctx.createBufferSource(); b.buffer = ctx.createBuffer(1, 1, 22050); b.connect(ctx.destination); b.start();
+    ctx.resume().then(() => { if (ctx.state === 'running') gestos.forEach((g) => removeEventListener(g, destrabar, true)); });
+  }
+  gestos.forEach((g) => addEventListener(g, destrabar, true));
 
   // semi: semitonos desde el Do central · fuerza: 0 a 1 · largo: segundos que queda sonando
   // espera: segundos hasta que suena · destino: a dónde va (por defecto, la salida general)
